@@ -8,7 +8,7 @@
 
 import streamlit as st
 import gspread
-from google.oauth2.service_account import Credentials
+creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(st.secrets["gcp_service_account"]), scope)
 import sqlite3, os, json, pandas as pd
 from datetime import datetime, timedelta, time as dt_time
 from PIL import Image
