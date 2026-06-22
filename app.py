@@ -32,16 +32,24 @@ input[type="text"],.stTextInput input{text-transform:uppercase!important}
 </style>""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════
-# اتصال Google Sheets
+# اتصال Google Sheets (تم حل مشكلة المفتاح هنا)
 # ══════════════════════════════════════════
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
-          "https://www.googleapis.com/auth/drive"]
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
 @st.cache_resource(ttl=500)
 def get_spreadsheet():
     if "gcp_service_account" in st.secrets:
-        creds = Credentials.from_service_account_info(
-            dict(st.secrets["gcp_service_account"]), scopes=SCOPES)
+        creds_dict = dict(st.secrets["gcp_service_account"])
+        
+        # --- المعالج البرمجي التلقائي لإصلاح المفتاح الخاص في السحابة ---
+        if "private_key" in creds_dict:
+            creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+        # -------------------------------------------------------------
+        
+        creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
     else:
         creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
     return gspread.authorize(creds).open("Drivers_Report")
@@ -198,9 +206,7 @@ if st.session_state.get('do_logout'):
         st.session_state[k] = v
     st.rerun()
 
-# ══════════════════════════════════════════
-# تهيئة التبويبات
-# ══════════════════════════════════════════
+# تهيئة التبويبات تلقائياً
 ensure_worksheets()
 
 # ══════════════════════════════════════════
